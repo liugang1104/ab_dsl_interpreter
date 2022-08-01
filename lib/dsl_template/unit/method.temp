@@ -1,0 +1,8 @@
+
+    @override
+    {{returnType}} {{methodName}}({{argsDef}}) async {
+        final res = await _channel.invokeMethod{{castType}}(
+            {{channelArgs}}
+        );
+        {{returnStr}}
+    }

@@ -1,0 +1,16 @@
+import 'dart:async';
+
+import 'package:{{name}}_platform_interface/{{name}}_platform_interface.dart';
+export 'package:{{name}}_platform_interface/{{name}}_platform_interface.dart';
+
+{{name.pascalCase()}}Platform get _platform => {{name.pascalCase()}}Platform.instance;
+
+class {{name.pascalCase()}} {
+  const {{name.pascalCase()}}._();
+
+  static const {{name.pascalCase()}} _instance = {{name.pascalCase()}}._();
+
+  factory {{name.pascalCase()}}() => _instance;
+
+  {{methods}}
+}

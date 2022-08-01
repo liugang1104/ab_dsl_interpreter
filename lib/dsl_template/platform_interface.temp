@@ -1,0 +1,3 @@
+library {{plugin_name}}_platform_interface;
+
+{{exports}}

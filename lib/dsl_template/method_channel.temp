@@ -1,0 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+{{imports}}
+
+const MethodChannel _channel = MethodChannel('io.ambergroup.plugins/{{name}}');
+
+/// An implementation of [{{name.pascalCase()}}Platform]
+class MethodChannel{{name.pascalCase()}} extends {{name.pascalCase()}}Platform {
+    {{methods}}
+}
