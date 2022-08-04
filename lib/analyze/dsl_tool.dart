@@ -62,4 +62,12 @@ extension StringExtension on String {
     if (length == 0) return "";
     return "${this[0].toUpperCase()}${substring(1)}";
   }
+
+  // 类型是否可选
+  bool get isOptional {
+    if (endsWith('?>') || endsWith('?')) {
+      return true;
+    }
+    return false;
+  }
 }

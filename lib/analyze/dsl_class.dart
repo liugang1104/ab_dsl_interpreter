@@ -20,10 +20,8 @@ extension ClauseDeclarationImplUtils on ClassDeclarationImpl {
       methods.add(map);
     }
     for (var child in childEntities.whereType<AnnotationImpl>()) {
-      if (child is AnnotationImpl) {
-        annotation.addAll(child.translateToJson());
-        annotationMap.addAll(child.translateToJson());
-      }
+      annotation.addAll(child.translateToJson());
+      annotationMap.addAll(child.translateToJson());
     }
 
     bool isAbstract = false;
@@ -33,30 +31,19 @@ extension ClauseDeclarationImplUtils on ClassDeclarationImpl {
 
     Map classMap = {};
     classMap["className"] = name.name;
-    classMap['superClass'] = extendsClause?.superclass?.name?.name;
+    classMap['superClass'] = extendsClause?.superclass.name.name;
     classMap["supportPlatforms"] = annotationMap["supportPlatforms"] ?? [];
     classMap["deprecated"] = getDeprecated(annotationMap);
-    classMap["isSingleton"] = annotationMap["isSingleton"] ?? false;
     classMap["isAbstract"] = isAbstract;
-    classMap["isSerializable"] = annotationMap["isSerializable"] ?? false;
-    classMap["isParcelable"] = annotationMap["isParcelable"] ?? false;
-    classMap["isCloneable"] = annotationMap["isCloneable"] ?? false;
-    classMap["isKeep"] = annotationMap["isKeep"] ?? false;
-    classMap["annotationCh"] = annotationMap["annotationCh"] ?? {};
-    classMap["annotationEn"] = annotationMap["annotationEn"] ?? {};
     classMap["memberVariables"] = members;
     classMap["properties"] = propertyMap;
     classMap["methods"] = methods;
     classMap["annotation"] = annotation;
-    annotationMap?.forEach((key, value) {
-      if (classMap?.containsKey(key) == false) {
+    annotationMap.forEach((key, value) {
+      if (classMap.containsKey(key) == false) {
         classMap[key] = value;
       }
     });
-    if (isAbstract) {
-      classMap['bindClassName'] = annotationMap['bindClassName'];
-      classMap['bindClassArgName'] = annotationMap['bindClassArgName'];
-    }
     return classMap;
   }
 }

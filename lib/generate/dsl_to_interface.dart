@@ -3,9 +3,8 @@ import 'dart:io';
 import 'package:ab_dsl_interpreter/analyze/dsl_entity.dart';
 import 'package:ab_dsl_interpreter/analyze/dsl_tool.dart';
 import 'package:ab_dsl_interpreter/dsl_constant.dart';
-import 'package:ab_dsl_interpreter/generate/tool.dart';
 
-class DSLToInterface with Tool {
+class DSLToInterface {
   final UseCaseEntity entry;
 
   DSLToInterface({
@@ -85,7 +84,7 @@ class DSLToInterface with Tool {
         Map context = {
           'returnType': method.returnType,
           'methodName': method.methodName,
-          'castType': '<${method.castType}>',
+          'castType': _makeCastType(method),
           'argsDef': method.argsDefine,
           'channelArgs': _makeChannelArgs(method),
           'returnStr': _makeReturnString(method),
@@ -96,6 +95,27 @@ class DSLToInterface with Tool {
       }
     }
     return methods;
+  }
+
+  // channel 返回值类型，obj类型转为map
+  String _makeCastType(UseCaseMethod method) {
+    if (method.isVoidReturnType) {
+      return '';
+    }
+    if (DslConstant.baseTypes.contains(method.originReturnType)) {
+      return '<${method.originReturnType}>';
+    }
+    if (method.originReturnType.startsWith('List<')) {
+      String subType = method.originReturnType;
+      subType = subType
+          .substring(subType.indexOf("<") + 1, subType.lastIndexOf(">"))
+          .trim();
+      if (DslConstant.baseTypes.contains(subType)) {
+        return '<${method.originReturnType}>';
+      }
+      return '<List<Map>>';
+    }
+    return '<Map<String, dynamic>>';
   }
 
   String _makeChannelArgs(UseCaseMethod method) {
@@ -116,6 +136,64 @@ class DSLToInterface with Tool {
     }
     String returnType = method.originReturnType;
     String returnKey = 'res';
-    return "return ${createFactory(returnKey, returnType)};";
+    bool isOptional = method.returnType.isOptional;
+    return "return ${createFactory(returnKey, returnType, isOptional: isOptional)};";
+  }
+
+  String createFactory(String key, dynamic value, {bool isOptional = false}) {
+    // 基础类型
+    if (DslConstant.baseTypes.contains(value)) {
+      if (isOptional) {
+        return '$key';
+      }
+      return "$key ?? ${DslConstant.defaultValue[value]}";
+    } else if (value is String && value.trim().startsWith('List<')) {
+      String subType = value.trim();
+      subType = subType
+          .substring(subType.indexOf("<") + 1, subType.lastIndexOf(">"))
+          .trim();
+      if (DslConstant.baseTypes.contains(subType)) {
+        if (isOptional) {
+          return '$key';
+        } else {
+          return '$key ?? []';
+        }
+      } else {
+        return "($key ?? []).map((element) => ${createFactory(
+          'element',
+          subType,
+          isOptional: true,
+        )}).toList()";
+      }
+    } else if (value is String && value.trim().startsWith('Map<')) {
+      final String dartType = value.trim();
+      final int firstLeftQuarterIndex = dartType.indexOf("<");
+
+      ///语法解析，获得map的key和value
+      int wrapSymbolCount = 0;
+      int index = firstLeftQuarterIndex + 1;
+      int commaIndex = 0;
+      while (index < dartType.length) {
+        if (dartType[index] == "<") {
+          wrapSymbolCount++;
+        } else if (dartType[index] == ">") {
+          wrapSymbolCount--;
+        } else if (dartType[index] == ",") {
+          if (wrapSymbolCount == 0) {
+            commaIndex = index;
+            break;
+          }
+        }
+        index++;
+      }
+
+      final String mapKeyType =
+          dartType.substring(firstLeftQuarterIndex + 1, commaIndex).trim();
+      final String mapValueType =
+          dartType.substring(commaIndex + 1, dartType.lastIndexOf(">")).trim();
+      return "($key ?? {}).map((key, element) => MapEntry(${createFactory('key', mapKeyType, isOptional: true)}, ${createFactory('element', mapValueType, isOptional: true)}))";
+    }
+    // 只剩下可序列化的对象
+    return "$value.fromJson(${isOptional ? '$key' : '$key ?? {}'})";
   }
 }

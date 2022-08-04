@@ -1,18 +1,10 @@
-#import "{{name.pascalCase()}}.h"
-#if __has_include(<{{name}}/{{name}}-Swift.h>)
-#import <{{name}}/{{name}}-Swift.h>
-#else
-// Support project import fallback if the generated compatibility header
-// is not copied when this plugin is created as a library.
-// https://forums.swift.org/t/swift-static-libraries-dont-copy-generated-objective-c-header/19816
-#import "{{name}}-Swift.h"
-#endif
+#import "{{name.pascalCase()}}Plugin.h"
 
-@implementation {{name.pascalCase()}}
+@implementation {{name.pascalCase()}}Plugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:@"io.ambergroup.plugins/{{name}}"
                                                                 binaryMessenger:[registrar messenger]];
-    {{name.pascalCase()}}* instance = [[{{name.pascalCase()}} alloc] init];
+    {{name.pascalCase()}}Plugin* instance = [[{{name.pascalCase()}}Plugin alloc] init];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 

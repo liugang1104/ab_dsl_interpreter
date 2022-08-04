@@ -1,16 +1,3 @@
-import '../dsl_constant.dart';
-
-mixin RewriteClass {
-  String iOSRewriteName = '';
-  String androidRewriteName = '';
-
-  void rewriteByJson(Map<String, dynamic> json) {
-    Map annotation = json['annotation'];
-    iOSRewriteName = annotation['iOSRewriteName'];
-    androidRewriteName = annotation['androidRewriteName'];
-  }
-}
-
 mixin ImportEntity {
   List<String> _ios_import = [];
   List<String> _android_import = [];
@@ -21,11 +8,10 @@ mixin ImportEntity {
   List<String> get dart_import => _dart_import;
 }
 
-class EnumEntity with RewriteClass {
+class EnumEntity {
   String name = '';
 
   EnumEntity.fromJson(Map<String, dynamic> json) {
-    rewriteByJson(json);
     name = json['name'];
   }
 }
@@ -51,6 +37,7 @@ class PropertyEntity {
   final bool isFinal;
   final String deprecated;
   final dynamic value;
+  final List<String> comments;
 
   String get dartType {
     if (type == 'LongLong') {
@@ -76,24 +63,23 @@ class PropertyEntity {
     this.isFinal = false,
     this.deprecated = '',
     this.value,
+    this.comments = const [],
   });
 
   factory PropertyEntity.fromJson(Map json) {
-    json ??= {};
-    Map annotation = json['annotation'] ?? {};
     return PropertyEntity(
-      type: json['type'] ?? '',
-      name: json['name'] ?? "",
-      deprecated: json['deprecated'] ?? "",
-      isStatic: json['isStatic'] ?? false,
-      isFinal: json['isFinal'] ?? false,
-      value: json['value'],
-      serializedName: json['serializedName'] ?? '',
-    );
+        type: json['type'] ?? '',
+        name: json['name'] ?? '',
+        deprecated: json['deprecated'] ?? "",
+        isStatic: json['isStatic'] ?? false,
+        isFinal: json['isFinal'] ?? false,
+        value: json['value'],
+        serializedName: json['serializedName'] ?? '',
+        comments: json['comments'] ?? []);
   }
 }
 
-class ModelEntity with RewriteClass, ImportEntity {
+class ModelEntity with ImportEntity {
   List<String> ios_import = [];
   List<String> android_import = [];
   List<String> dart_import = [];
@@ -107,7 +93,6 @@ class ModelEntity with RewriteClass, ImportEntity {
   bool isStatic = false;
 
   ModelEntity.fromJson(Map<String, dynamic> json) {
-    rewriteByJson(json);
     var _properties = json['properties'];
     if (_properties != null && _properties is Map) {
       properties = _properties.map<String, PropertyEntity>((key, value) {
@@ -153,7 +138,7 @@ class ModelListEntity {
   }
 }
 
-class UseCaseClass with RewriteClass {
+class UseCaseClass {
   String className;
   final List<UseCaseMethod> methods;
   final bool isStatic;
@@ -191,19 +176,19 @@ class UseCaseClass with RewriteClass {
           .map((e) => PropertyEntity.fromJson(e))
           .toList(),
     );
-    // useCaseClass.rewriteByJson(map.cast<String, dynamic>());
     return useCaseClass;
   }
 }
 
 class UseCaseMethod {
   //下面两个用于Android的method中的callback收集
-  AndroidCallback? callback;
+  // AndroidCallback? callback;
   String callbackMethodName;
 
   final String platform;
   final String methodName;
   final String returnType;
+  final List<String> comments;
   final List<ArgumentEntity> arguments;
   final String nullFlag;
   final bool isStatic;
@@ -215,6 +200,7 @@ class UseCaseMethod {
     this.platform = '',
     this.methodName = '',
     this.returnType = '',
+    this.comments = const [],
     this.arguments = const [],
     this.nullFlag = '',
     this.isStatic = false,
@@ -223,36 +209,36 @@ class UseCaseMethod {
 
   factory UseCaseMethod.fromMap(Map map) {
     return UseCaseMethod(
-      platform: map['platform'] ?? "",
-      methodName: map['methodName'] ?? "",
-      returnType: map['returnType'] ?? "",
-      nullFlag: map['nullFlag'] ?? "",
-      isStatic: map['isStatic'] ?? false,
-      arguments: ((map['arguments'] ?? []) as List)
-          .map((e) => ArgumentEntity.fromJson(e))
-          .toList(),
-      deprecated: map['deprecated'] ?? "",
-    );
+        platform: map['platform'] ?? "",
+        methodName: map['methodName'] ?? "",
+        returnType: map['returnType'] ?? "",
+        nullFlag: map['nullFlag'] ?? '',
+        isStatic: map['isStatic'] ?? false,
+        arguments: ((map['arguments'] ?? []) as List)
+            .map((e) => ArgumentEntity.fromJson(e))
+            .toList(),
+        deprecated: map['deprecated'] ?? "",
+        comments: map['comments'] ?? []);
   }
 
   bool get isVoidReturnType => returnType == 'Future<void>';
 
-  // channel 返回值类型，obj类型转为map
-  String get castType {
-    if (baseTypes.contains(originReturnType) ||
-        originReturnType.startsWith('Map<') ||
-        originReturnType.startsWith('List<')) {
-      return originReturnType;
-    }
-    return 'Map<String, dynamic>';
-  }
-
-  // 不带Future的返回值类型
+  // 不带Future 和 ？的返回值类型
+  String _originReturnType = '';
   String get originReturnType {
-    if (returnType.startsWith('Future')) {
-      return returnType.substring(7, returnType.length - 1);
+    if (_originReturnType.isNotEmpty) {
+      return _originReturnType;
     }
-    return returnType;
+    _originReturnType = returnType;
+    if (_originReturnType.startsWith('Future')) {
+      _originReturnType =
+          _originReturnType.substring(7, _originReturnType.length - 1);
+    }
+    if (_originReturnType.endsWith('?')) {
+      _originReturnType =
+          _originReturnType.substring(0, _originReturnType.length - 1);
+    }
+    return _originReturnType;
   }
 
   // 方法参数定义: String arg1, int arg2
@@ -281,17 +267,6 @@ class UseCaseMethod {
 
   static final String voidReturn = 'Future<dynamic>';
 
-  String get realReturnType {
-    if (returnType == null ||
-        returnType.isEmpty ||
-        returnType == '' ||
-        returnType == 'void') {
-      return voidReturn;
-    } else {
-      return 'Future<$returnType>';
-    }
-  }
-
   String get callbackReturnType {
     String returnType = "";
     //返回success回调里的参数
@@ -314,7 +289,7 @@ class UseCaseMethod {
   String get callbackReturnKey {
     List<ArgumentEntity?>? args = arguments!
         .singleWhere((element) => element.name == 'success')
-        ?.callback
+        .callback
         ?.arguments;
     return args != null && args.length == 1 ? args[0]!.name : '';
   }
@@ -323,10 +298,7 @@ class UseCaseMethod {
     ArgumentEntity? arg = arguments.singleWhere(
       (element) => element.name == 'success',
     );
-    if (arg != null) {
-      return arg.callback!.arguments.length > 1;
-    }
-    return false;
+    return arg.callback!.arguments.length > 1;
   }
 
   bool get isNativeReturnType {
@@ -413,139 +385,4 @@ class ArgumentEntity {
       callback = UseCaseMethod.fromMap(json['callbackMap'] ?? {});
     }
   }
-}
-
-class Configure {
-  final String name;
-  final String source;
-  final String version;
-  final String description;
-  final String android_result_callback_name;
-  final String android_model_suffix;
-  final String ios_model_suffix;
-  // final ConfigureInfo androidManagerConfigure;
-  // AndroidConfigureInfo androidModuleConfigure;
-  // ConfigureInfo iosConfigure;
-  // ConfigureInfo flutterConfigure;
-  // ConfigureInfo iosModuleConfigure;
-  final String iosNameSpace;
-  final String androidNameSpace;
-  final String ios_string_property;
-
-  Configure({
-    this.name = '',
-    this.source = '',
-    this.version = '',
-    this.description = '',
-    this.android_result_callback_name = '',
-    this.android_model_suffix = '',
-    this.ios_model_suffix = '',
-    this.iosNameSpace = '',
-    this.androidNameSpace = '',
-    this.ios_string_property = '',
-  });
-
-  Configure.fromJson(Map json)
-      : name = json["name"] ?? "".replaceAll(" ", ""),
-        source = json["source"] ?? "",
-        version = json["version"] ?? "",
-        ios_string_property = json["ios_string_property"] ?? "strong",
-        description = json["description"] ?? "",
-        android_result_callback_name =
-            json["android_result_callback_name"] ?? "",
-        android_model_suffix = json["android_model_suffix"] ?? "",
-        ios_model_suffix = json["ios_model_suffix"] ?? "",
-        iosNameSpace = json['ios_name_space'] ?? '',
-        androidNameSpace = json['android_name_space'] ?? '';
-  // androidManagerConfigure =
-  //     ConfigureInfo.fromJson(json["android_configure_manager"] ?? {}),
-  // androidModuleConfigure = AndroidConfigureInfo.fromJson(
-  //     json["android_configure_usecase_module"] ?? {}),
-  // iosConfigure = ConfigureInfo.fromJson(json["ios_configure"] ?? {}),
-  // flutterConfigure =
-  //     ConfigureInfo.fromJson(json["flutter_configure"] ?? {}),
-  // android_generic_list_to_arraylist =
-  //     json["android_generic_list_to_arraylist"] ?? true,
-  // iosModuleConfigure = ConfigureInfo.fromJson(
-  //     json["ios_configure_ty_ka_usecase_module"] ?? {}
-  // );
-}
-
-class ConfigureInfo {
-  final String path;
-  final GitInfo git;
-  final String name;
-  final String sdk_header;
-
-  ConfigureInfo.fromJson(Map json)
-      : git = GitInfo.fromJson(json["git"] ?? {}),
-        path = json["path"] ?? "",
-        sdk_header = json["sdk_import_header"] ?? "",
-        name = json["name"];
-}
-
-class AndroidConfigureInfo {
-  final String path;
-  final GitInfo git;
-  final String name;
-  final String sdk_header;
-  final bool kotlin_code;
-
-  AndroidConfigureInfo.fromJson(Map json)
-      : git = GitInfo.fromJson(json["git"] ?? {}),
-        path = json["path"] ?? "",
-        sdk_header = json["sdk_import_header"] ?? "",
-        kotlin_code = json["kotlin_code"] ?? false,
-        name = json["name"];
-}
-
-class GitInfo {
-  final String url;
-  final String branch;
-
-  GitInfo.fromJson(Map json)
-      : url = json['url'] ?? "",
-        branch = json['branch'] ?? "";
-}
-
-class AndroidCallback {
-  static final TYPE_CALLBACK = 1;
-  static final TYPE_RESULT_CALLBACK = 2;
-  static final TYPE_SUCCESS_CALLBACK = 3;
-  static final TYPE_SUCCESS_RESULT_CALLBACK = 4;
-  String callbackName;
-  int startIndex = -1;
-  List<UseCaseMethod> callbackMethods = [];
-  bool isGeneralCallback = false; //是否为通用的callback类型，默认false
-  String genericDartType = ""; //范型类型
-
-  int get generalCallbackType {
-    if (callbackName.startsWith('ITYKACallback')) {
-      return TYPE_CALLBACK;
-    } else if (callbackName.startsWith('ITYKAResultCallback')) {
-      return TYPE_RESULT_CALLBACK;
-    } else if (callbackName.startsWith('ITYKASuccessCallback')) {
-      return TYPE_SUCCESS_CALLBACK;
-    } else if (callbackName.startsWith('ITYKASuccessResultCallback')) {
-      return TYPE_SUCCESS_RESULT_CALLBACK;
-    } else {
-      return -1;
-    }
-  }
-
-  String get generalCallbackPck {
-    if (callbackName.startsWith('ITYKACallback')) {
-      return 'com.tuya.smart.kausecasemanager.callback.ITYKACallback';
-    } else if (callbackName.startsWith('ITYKAResultCallback')) {
-      return 'com.tuya.smart.kausecasemanager.callback.ITYKAResultCallback';
-    } else if (callbackName.startsWith('ITYKASuccessCallback')) {
-      return 'com.tuya.smart.kausecasemanager.callback.ITYKASuccessCallback';
-    } else if (callbackName.startsWith('ITYKASuccessResultCallback')) {
-      return 'com.tuya.smart.kausecasemanager.callback.ITYKASuccessResultCallback';
-    } else {
-      return '';
-    }
-  }
-
-  AndroidCallback({this.callbackName = '', this.startIndex = -1});
 }

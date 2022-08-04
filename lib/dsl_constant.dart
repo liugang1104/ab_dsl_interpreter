@@ -3,28 +3,6 @@ import 'dart:io';
 
 import 'analyze/dsl_entity.dart';
 
-const List<String> baseTypes = [
-  'int',
-  'double',
-  'num',
-  'String',
-  'bool',
-  'Map',
-  'List',
-  'dynamic',
-  'void'
-];
-
-const Map<String, String> defaultValue = {
-  'int': '0',
-  'double': '0.0',
-  'num': '0',
-  'String': '\'\'',
-  'bool': 'false',
-  'Map': '{}',
-  'List': '[]',
-};
-
 class DslConstant {
   // 插件根目录
   static String pluginPath = '';
@@ -44,6 +22,29 @@ class DslConstant {
 
   // json目录
   static String get dslJsonDir => '$workspaceDir/dsl_json';
+
+  // 基础类型
+  static const List<String> baseTypes = [
+    'int',
+    'double',
+    'num',
+    'String',
+    'bool',
+    'Map',
+    'List',
+    'dynamic',
+    'void'
+  ];
+
+  static const Map<String, String> defaultValue = {
+    'int': '0',
+    'double': '0.0',
+    'num': '0',
+    'String': '\'\'',
+    'bool': 'false',
+    'Map': '{}',
+    'List': '[]',
+  };
 
   // 总数据
   static Map? _jsonData;
@@ -96,7 +97,7 @@ class DslConstant {
   // 所有自定义的listener
   static List<UseCaseClass> get allListeners => _allListeners;
   static List<UseCaseClass> _allListeners = [];
-  static List<AndroidCallback> listAndroidCallbacks = [];
+  // static List<AndroidCallback> listAndroidCallbacks = [];
 
   // 所有枚举数据名称
   static List<String> _enumNameList = [];
@@ -174,32 +175,12 @@ class DslConstant {
     _allEnums = [];
     _allConstants = [];
     _allCallbacks = [];
-    var rewriteFunc = (RewriteClass element, String key) {
-      if (element.iOSRewriteName.isNotEmpty == true) {
-        iosRewriteNameMap[key] = element.iOSRewriteName;
-      }
-      if (element.androidRewriteName.isNotEmpty == true) {
-        androidRewriteNameMap[key] = element.androidRewriteName;
-      }
-    };
 
     _jsonData!.forEach((key, value) {
       Map useCaseMap = value;
-
-      var rewriteUseCaseMap = (UseCaseClass element) {
-        rewriteFunc(element, element.className);
-        allObjectClass.add(element);
-        if (element.isAbstract) {
-          allAbstractObjectClass.add(element);
-          allIOSAbstractClass.add(element.className);
-          allAbstractClass.add(element.className);
-        }
-      };
-
       useCaseMap.forEach((key, value) {
         if (value is UseCaseEntity) {
           _allCallbacks.addAll(value.callbacks);
-          value.classes.forEach((element) => rewriteUseCaseMap(element));
         }
       });
     });
