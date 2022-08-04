@@ -12,8 +12,7 @@ class DSLToInterface with Tool {
     required this.entry,
   });
 
-  String outDir =
-      '${DslConstant.pluginPath}/${DslConstant.workspace}/platform_interface';
+  String outDir = '${DslConstant.workspaceDir}/platform_interface';
 
   void generate() {
     Directory(outDir).createSync();

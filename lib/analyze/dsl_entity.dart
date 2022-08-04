@@ -16,18 +16,6 @@ mixin ImportEntity {
   List<String> _android_import = [];
   List<String> _dart_import = [];
 
-  List<String> get ios_import {
-    return _ios_import.map((e) {
-      return DslConstant.iosReplaceFileNameMap[e] ?? e;
-    }).toList();
-  }
-
-  List<String> get ios_sdk_import {
-    return _ios_import.map((e) {
-      return DslConstant.iosSDKFileNameMap[e] ?? e;
-    }).toList();
-  }
-
   List<String> get android_import => _android_import;
 
   List<String> get dart_import => _dart_import;
@@ -133,50 +121,6 @@ class ModelEntity with RewriteClass, ImportEntity {
     isCloneable = json['isCloneable'] ?? false;
     isKeep = json['isKeep'] ?? false;
   }
-
-  String get iosClassName {
-    if (iOSRewriteName?.isNotEmpty == true) {
-      return iOSRewriteName;
-    }
-    String name = className;
-    if (name.endsWith(DslConstant.configure.android_model_suffix)) {
-      name = name.substring(
-          0, name.length - DslConstant.configure.android_model_suffix.length);
-    }
-    if (!name.endsWith(DslConstant.configure.ios_model_suffix)) {
-      name = name + DslConstant.configure.ios_model_suffix;
-    }
-    if (!name.startsWith(DslConstant.configure.iosNameSpace)) {
-      name = DslConstant.configure.iosNameSpace + name;
-    }
-    return name;
-  }
-
-  String get androidClassName {
-    if (androidRewriteName?.isNotEmpty == true) {
-      return androidRewriteName;
-    }
-
-    String name = className;
-    if (DslConstant.configure.android_model_suffix?.isNotEmpty == true) {
-      if (name.endsWith("Model")) {
-        name = name.substring(0, name.length - 5);
-      } else if (name.endsWith("Bean")) {
-        name = name.substring(0, name.length - 4);
-      }
-      name = name + DslConstant.configure.android_model_suffix;
-    }
-    // if (name.endsWith(DslConstant.configure.ios_model_suffix)) {
-    //   name = name.substring(0, name.length - DslConstant.configure.ios_model_suffix.length);
-    // }
-    // if (!name.endsWith(DslConstant.configure.android_model_suffix)) {
-    //   name = name + DslConstant.configure.android_model_suffix;
-    // }
-    if (!name.startsWith(DslConstant.configure.androidNameSpace)) {
-      name = DslConstant.configure.androidNameSpace + name;
-    }
-    return name;
-  }
 }
 
 class ModelListEntity {
@@ -249,32 +193,6 @@ class UseCaseClass with RewriteClass {
     );
     // useCaseClass.rewriteByJson(map.cast<String, dynamic>());
     return useCaseClass;
-  }
-
-  String get iOSClassName {
-    if (iOSRewriteName?.isNotEmpty == true) {
-      return iOSRewriteName;
-    }
-    String name = className;
-    if (!name.startsWith(DslConstant.configure.iosNameSpace)) {
-      name = DslConstant.configure.iosNameSpace + name;
-    }
-    return name;
-  }
-
-  String get androidClassName {
-    if (androidRewriteName?.isNotEmpty == true) {
-      return androidRewriteName;
-    }
-    String name = className;
-    if (!name.startsWith(DslConstant.configure.androidNameSpace)) {
-      name = DslConstant.configure.androidNameSpace + name;
-    }
-
-    if (!name.startsWith("I")) {
-      name = name;
-    }
-    return name;
   }
 }
 

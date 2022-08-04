@@ -13,7 +13,7 @@ class DSLToIos {
     required this.entry,
   });
 
-  String outDir = '${DslConstant.pluginPath}/${DslConstant.workspace}/ios';
+  String outDir = '${DslConstant.workspaceDir}/ios';
 
   void generate() {
     Directory(outDir).createSync();

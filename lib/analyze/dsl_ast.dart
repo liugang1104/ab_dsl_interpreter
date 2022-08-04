@@ -14,19 +14,17 @@ main(List<String> args) {
 }
 
 generateJsonFile() {
-  String pluginPath = '/Users/mark.liu/MyFiles/work/share/my_plugin';
-  String jsonPath =
-      '$pluginPath/${DslConstant.workspace}/${DslConstant.dslJsonTempPath}';
-  Directory(jsonPath).createSync(recursive: true);
+  Directory(DslConstant.dslJsonDir).createSync(recursive: true);
 
-  final dslDir = Directory('$pluginPath/my_plugin_platform_interface/lib/src');
+  final dslDir = Directory(
+      '${DslConstant.pluginPath}/${DslConstant.pluginName}_platform_interface/lib/src');
   List<FileSystemEntity> dslDirList =
       dslDir.listSync(recursive: false, followLinks: false);
 
   List<String> fileNames = [];
   dslDirList.forEach((final file) {
     fileNames.add(path.basename(file.path));
-    buildJsonFileFromDartFile(file.path, jsonPath);
+    buildJsonFileFromDartFile(file.path, DslConstant.dslJsonDir);
   });
   DslConstant.interfaceSrcFiles = fileNames;
 }
@@ -73,7 +71,7 @@ Map readUnitDartFile(final File file) {
   final root = unit.root;
   String path = file.path.replaceAll(
       '${DslConstant.pluginName}_platform_interface/lib/src',
-      '${DslConstant.workspace}/${DslConstant.dslJsonTempPath}');
+      'workspace/dsl_json');
   path = path.replaceFirst(".dart", ".json");
   Map data = root.translateToJson(path);
   return data;
