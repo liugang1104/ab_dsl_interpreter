@@ -8,11 +8,8 @@ import 'analyze/dsl_ast.dart' as dsl_ast;
 import 'generate/dsl_to_interface.dart';
 
 main(List<String> args) {
-  // String rootPath = args[0];
-  // String pluginName = args[1];
-
-  String rootPath = '/Users/mark.liu/share/my_plugin';
-  String pluginName = 'my_plugin';
+  String rootPath = args[0];
+  String pluginName = args[1];
 
   DslConstant.pluginPath = rootPath;
   DslConstant.pluginName = pluginName;
