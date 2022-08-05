@@ -28,6 +28,11 @@ class DSLToIos {
     String iosFileName = Casing.pascalCase(DslConstant.pluginName);
     String targetFilePath = '$outDir/${iosFileName}Plugin.m';
     DSLTooL.renderFile(templateFilePath, context, targetFilePath);
+
+    // 将生成的文件拷贝到plugin目录
+    String newPath =
+        '${DslConstant.pluginPath}/${DslConstant.pluginName}_ios/ios/Classes/${iosFileName}Plugin.m';
+    File(targetFilePath).copy(newPath);
   }
 
   List<String> _makeMethods() {
