@@ -14,59 +14,6 @@ extension AnnotationImplUtils on AnnotationImpl {
           }
         }
       }
-    } else if (annotationName == "TYChineseLabelAnnotation" ||
-        annotationName == "TYEnglishLabelAnnotation") {
-      Map annotationInfo = {};
-      Map exception = {};
-      if (arguments is ArgumentListImpl) {
-        NodeList<Expression> argumentsList = arguments!.arguments;
-        for (var item in argumentsList) {
-          if (item is NamedExpressionImpl) {
-            String name = item.name.toString().replaceAll(":", "");
-            var itemExp = item.expression;
-            if (itemExp is SimpleStringLiteralImpl) {
-              annotationInfo[name] = itemExp.stringValue ?? "";
-            } else if (itemExp is MethodInvocationImpl) {
-              exception["name"] = itemExp.methodName.toString().substring(
-                    2,
-                  );
-              ArgumentList arguments = itemExp.argumentList;
-              String content = "";
-              arguments.arguments.forEach((element) {
-                content = content + element.toString();
-              });
-              exception["message"] = content;
-              annotationInfo[name] = exception;
-            } else if (itemExp is SetOrMapLiteralImpl) {
-              Map map = {};
-              SetOrMapLiteralImpl tem = itemExp;
-              tem.becomeMap();
-              tem.elements.forEach((element) {
-                if (element is MapLiteralEntryImpl) {
-                  String key = '';
-                  String value = '';
-                  if (element.key is SimpleStringLiteralImpl) {
-                    key = (element.key as SimpleStringLiteralImpl).value;
-                  }
-                  if (element.value is SimpleStringLiteralImpl) {
-                    value = (element.value as SimpleStringLiteralImpl).value;
-                  }
-                  map[key] = value;
-                }
-              });
-              if (map != null) {
-                annotationInfo[name] = map ?? {};
-              }
-            }
-          }
-        }
-      }
-      annotation.addAll(annotationInfo);
-      if (annotationName == "TYChineseLabelAnnotation") {
-        annotation["annotationCh"] = annotationInfo;
-      } else {
-        annotation["annotationEn"] = annotationInfo;
-      }
     } else {
       if (arguments is ArgumentListImpl) {
         NodeList<Expression> argumentsList = arguments!.arguments;
@@ -78,7 +25,7 @@ extension AnnotationImplUtils on AnnotationImpl {
             if (itemExpression is SimpleStringLiteralImpl) {
               annotation[name] = itemExpression.stringValue ?? '';
             } else if (itemExpression is BooleanLiteralImpl) {
-              annotation[name] = itemExpression.value ?? false;
+              annotation[name] = itemExpression.value;
             } else if (itemExpression is ListLiteralImpl) {
               ListLiteralImpl itemEx = itemExpression;
               List listValues = [];
@@ -90,7 +37,7 @@ extension AnnotationImplUtils on AnnotationImpl {
                   listValues.add(t.identifier.toString());
                 }
               });
-              annotation[name] = listValues ?? [];
+              annotation[name] = listValues;
             } else if (itemExpression is SetOrMapLiteralImpl) {
               Map map = {};
               SetOrMapLiteralImpl tem = itemExpression;

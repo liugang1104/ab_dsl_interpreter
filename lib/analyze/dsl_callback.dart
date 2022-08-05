@@ -13,7 +13,7 @@ extension GenericTypeAliasImplUtils on GenericTypeAliasImpl {
       returnType = data["returnType"];
       arguments = data["arguments"];
     }
-    if (returnType == null || returnType == "") returnType = "void";
+    if (returnType == "") returnType = "void";
     return {
       "methodName": this.name.name,
       "returnType": returnType,
@@ -58,10 +58,10 @@ extension FormalParameterListImplUtils on FormalParameterListImpl {
     AstNode node = this;
     while (node.parent != null) {
       if (node is MethodDeclarationImpl) {
-        String methodName = node.name.name ?? "";
+        String methodName = node.name.name;
         callbackName = methodName.capitalize() + callbackName;
       } else if (node is ClassDeclarationImpl) {
-        String className = node.name.name ?? "";
+        String className = node.name.name;
         callbackName = className.capitalize() + callbackName;
       }
       node = node.parent!;

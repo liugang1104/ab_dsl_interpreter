@@ -287,7 +287,7 @@ class UseCaseMethod {
   }
 
   String get callbackReturnKey {
-    List<ArgumentEntity?>? args = arguments!
+    List<ArgumentEntity?>? args = arguments
         .singleWhere((element) => element.name == 'success')
         .callback
         ?.arguments;
