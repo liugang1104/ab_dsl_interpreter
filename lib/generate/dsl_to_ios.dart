@@ -20,6 +20,7 @@ class DSLToIos {
 
     List<String> methods = _makeMethods();
     Map context = {
+      'date': DSLTooL.dateStr(),
       'name': DslConstant.pluginName,
       'methods': methods.join('\n'),
     };
@@ -49,6 +50,7 @@ class DSLToIos {
         }
 
         String methodStr = '''
+${method.commentString}
 - (void)${method.methodName}:(nullable id)arguments result:(FlutterResult)result {
    // do method implementation
 }

@@ -188,7 +188,7 @@ class UseCaseMethod {
   final String platform;
   final String methodName;
   final String returnType;
-  final List<String> comments;
+  final List<String>? comments;
   final List<ArgumentEntity> arguments;
   final String nullFlag;
   final bool isStatic;
@@ -218,7 +218,7 @@ class UseCaseMethod {
             .map((e) => ArgumentEntity.fromJson(e))
             .toList(),
         deprecated: map['deprecated'] ?? "",
-        comments: map['comments'] ?? []);
+        comments: (map['comments'] ?? []).cast<String>());
   }
 
   bool get isVoidReturnType => returnType == 'Future<void>';
@@ -264,6 +264,9 @@ class UseCaseMethod {
     }
     return str;
   }
+
+  // 方法注释
+  String get commentString => comments != null ? comments!.join('\n') : '';
 
   static final String voidReturn = 'Future<dynamic>';
 

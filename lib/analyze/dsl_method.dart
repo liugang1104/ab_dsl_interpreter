@@ -17,7 +17,7 @@ extension MethodDeclarationImplUtils on MethodDeclarationImpl {
       annotationMap.addAll(child.translateToJson());
     }
 
-    List comments = [];
+    List<String> comments = [];
     for (final node in childEntities.whereType<CommentImpl>()) {
       comments = node.translateToJson();
     }
@@ -26,7 +26,7 @@ extension MethodDeclarationImplUtils on MethodDeclarationImpl {
       "returnType": returnType.toString(),
       "nullFlag": '',
       "methodName": name.name,
-      "comment": comments,
+      "comments": comments,
       "deprecated": getDeprecated(annotationMap),
       "exception": getException(annotationMap),
       "isStatic": (modifierKeyword.toString() == "static" ? true : false),

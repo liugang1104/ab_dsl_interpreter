@@ -1,3 +1,7 @@
+//
+// DSL generated file. {{date}}
+//
+
 #import "{{name.pascalCase()}}Plugin.h"
 
 @implementation {{name.pascalCase()}}Plugin
