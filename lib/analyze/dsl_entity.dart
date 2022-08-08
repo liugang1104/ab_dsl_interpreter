@@ -188,7 +188,7 @@ class UseCaseMethod {
   final String platform;
   final String methodName;
   final String returnType;
-  final List<String>? comments;
+  final List<String> comments;
   final List<ArgumentEntity> arguments;
   final String nullFlag;
   final bool isStatic;
@@ -266,7 +266,7 @@ class UseCaseMethod {
   }
 
   // 方法注释
-  String get commentString => comments != null ? comments!.join('\n') : '';
+  String get commentString => comments.join('\n');
 
   static final String voidReturn = 'Future<dynamic>';
 

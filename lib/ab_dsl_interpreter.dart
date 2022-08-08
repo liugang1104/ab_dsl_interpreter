@@ -3,6 +3,7 @@ library ab_dsl_interpreter;
 import 'package:ab_dsl_interpreter/dsl_constant.dart';
 import 'package:ab_dsl_interpreter/generate/dsl_to_entrance.dart';
 import 'package:ab_dsl_interpreter/generate/dsl_to_ios.dart';
+import 'package:ab_dsl_interpreter/generate/dsl_to_markdown.dart';
 
 import 'analyze/dsl_ast.dart' as dsl_ast;
 import 'generate/dsl_to_interface.dart';
@@ -30,6 +31,7 @@ main(List<String> args) {
         DSLToInterface(entry: value).generate();
         DSLToEntrance(entry: value).generate();
         DSLToIos(entry: value).generate();
+        DSLToMarkDown(entry: value).generate();
       }
     });
   });
