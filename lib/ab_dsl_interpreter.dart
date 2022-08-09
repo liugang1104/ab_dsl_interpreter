@@ -4,18 +4,16 @@ import 'package:ab_dsl_interpreter/dsl_constant.dart';
 import 'package:ab_dsl_interpreter/generate/dsl_to_entrance.dart';
 import 'package:ab_dsl_interpreter/generate/dsl_to_ios.dart';
 import 'package:ab_dsl_interpreter/generate/dsl_to_markdown.dart';
+import 'package:path/path.dart' as path;
 
 import 'analyze/dsl_ast.dart' as dsl_ast;
 import 'generate/dsl_to_interface.dart';
 
 main(List<String> args) {
-  String rootPath = '/Users/mark.liu/share/my_plugin';
-  String pluginName = 'my_plugin';
+  String rootPath = '/Users/mark.liu/pub_self/sk_device';
 
-  // if (kReleaseMode) {
-  //   rootPath = args[0];
-  //   pluginName = args[1];
-  // }
+  // String rootPath = args[0];
+  String pluginName = path.basename(rootPath);
 
   DslConstant.pluginPath = rootPath;
   DslConstant.pluginName = pluginName;
@@ -32,6 +30,7 @@ main(List<String> args) {
         DSLToEntrance(entry: value).generate();
         DSLToIos(entry: value).generate();
         DSLToMarkDown(entry: value).generate();
+        print("🎈🎈🎈 All done! 🎈🎈🎈");
       }
     });
   });

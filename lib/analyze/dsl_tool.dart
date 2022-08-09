@@ -11,6 +11,17 @@ class DSLTooL {
     File targetFile = File(targetFilePath);
     try {
       targetFile.writeAsStringSync(content);
+
+      // 格式化
+      if (targetFilePath.endsWith('.dart')) {
+        ProcessResult ref = Process.runSync(
+          'flutter',
+          ['format', '$targetFilePath', '-l', '80'],
+        );
+        if ((ref.stdout as String).trim().split('\n').length > 1) {
+          print(ref.stdout);
+        }
+      }
     } catch (e) {}
   }
 
