@@ -46,6 +46,8 @@ class DSLToInterface {
   /// 生成 method_channel_xx.dart
   void _generateMethodChannelFile() {
     List<String> imports = DslConstant.interfaceSrcFiles
+        .where((element) =>
+            element != 'method_channel_${DslConstant.pluginName}.dart')
         .map((e) =>
             'import \'package:${DslConstant.pluginName}_platform_interface/src/$e\';')
         .toList();
