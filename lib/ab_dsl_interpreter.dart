@@ -10,9 +10,9 @@ import 'analyze/dsl_ast.dart' as dsl_ast;
 import 'generate/dsl_to_interface.dart';
 
 main(List<String> args) {
-  String rootPath = '/Users/mark.liu/pub_self/sk_device';
+  // String rootPath = '/Users/mark.liu/pub_self/sk_device';
 
-  // String rootPath = args[0];
+  String rootPath = args[0];
   String pluginName = path.basename(rootPath);
 
   DslConstant.pluginPath = rootPath;
