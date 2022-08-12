@@ -5,12 +5,12 @@
 #import "{{name}}Plugin.h"
 #import "{{name}}Pigeon.h"
 
-@interface {{name}}Plugin()<{{name}}Api>
+@interface {{name}}Plugin()<MethodChannel{{name}>
 
 @end
 
 @implementation {{name}}Plugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    {{name}}ApiSetup([registrar messenger], [{{name}}Plugin new]);
+    MethodChannel{{name}}Setup([registrar messenger], [{{name}}Plugin new]);
 }
 @end
