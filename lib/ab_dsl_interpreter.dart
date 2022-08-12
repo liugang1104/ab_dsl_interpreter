@@ -10,9 +10,7 @@ import 'generate/dsl_to_dart.dart' as DSLToDart;
 import 'generate/dsl_to_ios.dart' as DSLToIos;
 
 main(List<String> args) {
-  String rootPath = '/Users/mark.liu/share/test/sk_device';
-
-  // String rootPath = args[0];
+  String rootPath = args[0];
   String pluginName = path.basename(rootPath);
 
   DslConstant.pluginPath = rootPath;
@@ -52,15 +50,19 @@ void _generatePigeonCode() {
   args.forEach((key, value) {
     options += ' --$key $value';
   });
-  ProcessResult ref = Process.runSync('flutter', options.split(' '));
+  Process.runSync('flutter', ['pub', 'get'],
+      workingDirectory: DslConstant.platformDir);
+  ProcessResult ref = Process.runSync('flutter', options.split(' '),
+      workingDirectory: DslConstant.platformDir);
   if ((ref.stderr as String).trim().split('\n').length > 1) {
     print(ref.stderr);
   }
 
   // 将pigeon生成的dart继承自Platform
   String content = File(DslConstant.pigeonDartOut).readAsStringSync();
-  content = content.replaceAll('class ${DslConstant.pascalPluginName}Api {',
-      'class ${DslConstant.pascalPluginName}Api extends ${DslConstant.pascalPluginName}Platform {');
+  content = content.replaceAll(
+      'class MethodChannel${DslConstant.pascalPluginName} {',
+      'class MethodChannel${DslConstant.pascalPluginName} extends ${DslConstant.pascalPluginName}Platform {');
 
   // 插入import
   String fromStr = 'package:flutter/services.dart\';\n';

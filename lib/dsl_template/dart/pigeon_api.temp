@@ -6,6 +6,6 @@ import 'package:pigeon/pigeon.dart';
 {{enums}}
 
 @HostApi()
-abstract class {{name}}Api {
+abstract class MethodChannel{{name}} {
     {{methods}}
 }
