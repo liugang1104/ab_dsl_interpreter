@@ -1,63 +1,25 @@
 import 'dart:io';
 
 import 'package:ab_dsl_interpreter/analyze/dsl_tool.dart';
-import 'package:dart_casing/dart_casing.dart';
 
 import '../analyze/dsl_entity.dart';
 import '../dsl_constant.dart';
 
-class DSLToIos {
-  final UseCaseEntity entry;
-
-  DSLToIos({
-    required this.entry,
-  });
-
+void generate(UseCaseEntity entity) {
   String outDir = '${DslConstant.workspaceDir}/ios';
+  Directory(outDir).createSync();
 
-  void generate() {
-    Directory(outDir).createSync();
+  Map context = {
+    'date': DSLTooL.dateStr(),
+    'name': DslConstant.pascalPluginName,
+  };
 
-    List<String> methods = _makeMethods();
-    Map context = {
-      'date': DSLTooL.dateStr(),
-      'name': DslConstant.pluginName,
-      'methods': methods.join('\n'),
-    };
+  String templatePath = '${DslConstant.templateDir}/ios/plugin.m.temp';
+  String targetPath = '$outDir/${DslConstant.pascalPluginName}Plugin.m';
+  DSLTooL.renderFile(templatePath, context, targetPath);
 
-    String templateFilePath = '${DslConstant.templateDir}/ios_plugin.temp';
-    String iosFileName = Casing.pascalCase(DslConstant.pluginName);
-    String targetFilePath = '$outDir/${iosFileName}Plugin.m';
-    DSLTooL.renderFile(templateFilePath, context, targetFilePath);
-
-    // 将生成的文件拷贝到plugin目录
-    String newPath =
-        '${DslConstant.pluginPath}/${DslConstant.pluginName}_ios/ios/Classes/${iosFileName}Plugin.m';
-    File(targetFilePath).copy(newPath);
-  }
-
-  List<String> _makeMethods() {
-    List<String> methods = [];
-    for (UseCaseClass cls in entry.classes) {
-      // 可能存在其它Model类，抽象类才是需要解析的api,
-      if (cls.superClass != 'PlatformInterface') {
-        continue;
-      }
-
-      for (UseCaseMethod method in cls.methods) {
-        if (method.methodName == 'instance') {
-          continue;
-        }
-
-        String methodStr = '''
-${method.commentString}
-- (void)${method.methodName}:(nullable id)arguments result:(FlutterResult)result {
-   // do method implementation
-}
-        ''';
-        methods.add(methodStr);
-      }
-    }
-    return methods;
-  }
+  // 将生成的文件拷贝到plugin目录
+  String newPath =
+      '${DslConstant.iosScrDir}/${DslConstant.pascalPluginName}Plugin.m';
+  File(targetPath).copy(newPath);
 }

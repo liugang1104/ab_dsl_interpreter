@@ -1,0 +1,16 @@
+//
+// DSL generated file. {{date}}
+//
+
+#import "{{name}}Plugin.h"
+#import "{{name}}Pigeon.h"
+
+@interface {{name}}Plugin()<{{name}}Api>
+
+@end
+
+@implementation {{name}}Plugin
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+    {{name}}ApiSetup([registrar messenger], [{{name}}Plugin new]);
+}
+@end

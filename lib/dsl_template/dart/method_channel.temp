@@ -1,0 +1,8 @@
+//
+// Generated file. Do not edit.
+//
+{{imports}}
+
+/// An middle ware of [{{name}}Platform] and [pigeon]. The actual method implementation in [xxx_pigeon.dart]!
+class MethodChannel{{name}} extends {{name}}Api implements {{name}}Platform {
+}

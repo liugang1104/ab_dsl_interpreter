@@ -31,8 +31,10 @@ generateJsonFile() {
 
 ///read dart file ,extra dart info to Json and finally build json file
 void buildJsonFileFromDartFile(String dartPath, String jsonPath) {
-  final Map data = readDirectoryDartFiles(dartPath);
-  writeDataToFile(data);
+  if (dartPath.endsWith('platform_interface.dart')) {
+    final Map data = readDirectoryDartFiles(dartPath);
+    writeDataToFile(data);
+  }
 }
 
 ///read files under [directoryPath]

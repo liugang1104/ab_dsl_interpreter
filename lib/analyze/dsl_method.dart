@@ -23,6 +23,7 @@ extension MethodDeclarationImplUtils on MethodDeclarationImpl {
     }
 
     return {
+      "originString": this.toString(),
       "returnType": returnType.toString(),
       "nullFlag": '',
       "methodName": name.name,

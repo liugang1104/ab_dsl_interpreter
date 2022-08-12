@@ -25,7 +25,7 @@ extension AstNodeUtils on AstNode {
       Map map = node.translateToJson();
       enumList.add(map);
     }
-    data["enum"] = enumList;
+    data["enums"] = enumList;
 
     List callbackList = [];
     for (final node in root.childEntities.whereType<GenericTypeAliasImpl>()) {

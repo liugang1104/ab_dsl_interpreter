@@ -1,0 +1,11 @@
+// DSL Generated. do not edit!
+import 'package:pigeon/pigeon.dart';
+
+{{classes}}
+
+{{enums}}
+
+@HostApi()
+abstract class {{name}}Api {
+    {{methods}}
+}

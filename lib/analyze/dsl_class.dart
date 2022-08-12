@@ -30,6 +30,7 @@ extension ClauseDeclarationImplUtils on ClassDeclarationImpl {
     }
 
     Map classMap = {};
+    classMap['plainString'] = this.toString();
     classMap["className"] = name.name;
     classMap['superClass'] = extendsClause?.superclass.name.name;
     classMap["supportPlatforms"] = annotationMap["supportPlatforms"] ?? [];

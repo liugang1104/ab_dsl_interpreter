@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dart_casing/dart_casing.dart';
+
 import 'analyze/dsl_entity.dart';
 
 class DslConstant {
@@ -9,12 +11,35 @@ class DslConstant {
 
   // 插件名称
   static String pluginName = '';
+  static String get pascalPluginName => Casing.pascalCase(pluginName);
+
+  // pigeon api path
+  static String get pigeonApiPath => '$platformDir/api.dart';
+
+  // pigeon dart文件输出路径
+  static String get pigeonDartOut =>
+      '$platformDir/lib/src/method_channel_${DslConstant.pluginName}.dart';
+
+  // pigeon java 文件输出路径
+  static String get pigeonJavaOut =>
+      '$pluginPath/${pluginName}_android/android/src/main/java/io/ambergroup/plugins/${pluginName}_android/pigeon.java';
 
   // generate src目录下的文件名
   static List<String> interfaceSrcFiles = [];
 
   // 工作区目录
   static String get workspaceDir => '$pluginPath/workspace';
+
+  // platform_interface 目录
+  static String get platformDir =>
+      '$pluginPath/${pluginName}_platform_interface';
+
+  // ios文件目录
+  static String get iosScrDir => '$pluginPath/${pluginName}_ios/ios/Classes';
+
+  // Android文件目录
+  static String get androidSrcDic =>
+      '$pluginPath/${pluginName}_android/android/src/main/java';
 
   // 模版目录
   static String get templateDir =>
@@ -72,16 +97,6 @@ class DslConstant {
   // 需要重写的类名
   static Map<String, String> iosRewriteNameMap = {};
   static Map<String, String> androidRewriteNameMap = {};
-
-  // 所有模型
-  static List<ModelEntity> allModels = [];
-  static List<String> _allModelClassNames = [];
-  static List<String> get allModelClassNames {
-    if (_allModelClassNames.isEmpty) {
-      _allModelClassNames = allModels.map<String>((e) => e.className).toList();
-    }
-    return _allModelClassNames;
-  }
 
   // 所有枚举
   static List<EnumEntity> get allEnums => _allEnums;
@@ -151,13 +166,7 @@ class DslConstant {
       if (fileName.isNotEmpty) {
         dynamic jsonData = _readJsonFromFile(jsonPath);
         allFilePaths.add(jsonPath);
-        if (type == "model") {
-          dataSource[fileName] = ModelListEntity.fromJson(jsonData);
-        } else if (type == "api") {
-          dataSource[fileName] = UseCaseEntity.fromJson(jsonData);
-        } else if (type == "enum" || type == "constants") {
-          dataSource[fileName] = EnumListEntity.fromJson(jsonData);
-        } else if (type == "callback") {
+        if (type == "api") {
           dataSource[fileName] = UseCaseEntity.fromJson(jsonData);
         }
       }

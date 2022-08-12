@@ -1,31 +1,12 @@
-mixin ImportEntity {
-  List<String> _ios_import = [];
-  List<String> _android_import = [];
-  List<String> _dart_import = [];
-
-  List<String> get android_import => _android_import;
-
-  List<String> get dart_import => _dart_import;
-}
-
 class EnumEntity {
-  String name = '';
+  String name;
+  String plainString;
 
-  EnumEntity.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-  }
-}
+  EnumEntity({this.name = '', this.plainString = ''});
 
-class EnumListEntity {
-  List<EnumEntity> enums = [];
-
-  EnumListEntity.fromJson(Map<String, dynamic> json) {
-    enums = [];
-    if (json["enum"] != null) {
-      for (var item in json["enum"]) {
-        enums.add(EnumEntity.fromJson(item));
-      }
-    }
+  factory EnumEntity.fromJson(Map<String, dynamic> json) {
+    return EnumEntity(
+        name: json['name'] ?? '', plainString: json['plainString'] ?? '');
   }
 }
 
@@ -79,66 +60,8 @@ class PropertyEntity {
   }
 }
 
-class ModelEntity with ImportEntity {
-  List<String> ios_import = [];
-  List<String> android_import = [];
-  List<String> dart_import = [];
-  Map<String, PropertyEntity> properties = {};
-  String className = '';
-
-  bool isSerializable = false;
-  bool isParcelable = false;
-  bool isCloneable = false;
-  bool isKeep = false;
-  bool isStatic = false;
-
-  ModelEntity.fromJson(Map<String, dynamic> json) {
-    var _properties = json['properties'];
-    if (_properties != null && _properties is Map) {
-      properties = _properties.map<String, PropertyEntity>((key, value) {
-        return MapEntry(key, PropertyEntity.fromJson(value));
-      });
-    }
-    className = json['className'];
-    isStatic = json['isStatic'] ?? false;
-    isSerializable = json['isSerializable'] ?? false;
-    isParcelable = json['isParcelable'] ?? false;
-    isCloneable = json['isCloneable'] ?? false;
-    isKeep = json['isKeep'] ?? false;
-  }
-}
-
-class ModelListEntity {
-  List<String> ios_import = [];
-  List<String> android_import = [];
-  List<String> dart_import = [];
-  List<ModelEntity> classes = [];
-
-  ModelListEntity.fromJson(Map<String, dynamic> json) {
-    if (json['ios_import'] != null) {
-      for (var item in json['ios_import']) {
-        ios_import.add(item);
-      }
-    }
-    if (json['android_import'] != null) {
-      for (var item in json['android_import']) {
-        android_import.add(item);
-      }
-    }
-    if (json['dart_import'] != null) {
-      for (var item in json['dart_import']) {
-        dart_import.add(item);
-      }
-    }
-    if (json['classes'] != null) {
-      for (var item in json['classes']) {
-        classes.add(ModelEntity.fromJson(item));
-      }
-    }
-  }
-}
-
 class UseCaseClass {
+  String plainString;
   String className;
   final List<UseCaseMethod> methods;
   final bool isStatic;
@@ -150,6 +73,7 @@ class UseCaseClass {
   String androidPckName;
 
   UseCaseClass({
+    this.plainString = '',
     this.className = '',
     this.methods = const [],
     this.isStatic = false,
@@ -163,6 +87,7 @@ class UseCaseClass {
 
   factory UseCaseClass.fromMap(Map map) {
     UseCaseClass useCaseClass = UseCaseClass(
+      plainString: map['plainString'] ?? '',
       className: map['className'],
       methods: ((map['methods'] ?? []) as List)
           .map((e) => UseCaseMethod.fromMap(e))
@@ -185,6 +110,7 @@ class UseCaseMethod {
   // AndroidCallback? callback;
   String callbackMethodName;
 
+  final String originString;
   final String platform;
   final String methodName;
   final String returnType;
@@ -196,6 +122,7 @@ class UseCaseMethod {
   // final CallbackParam? callbackParam;
 
   UseCaseMethod({
+    this.originString = '',
     this.callbackMethodName = '',
     this.platform = '',
     this.methodName = '',
@@ -209,6 +136,7 @@ class UseCaseMethod {
 
   factory UseCaseMethod.fromMap(Map map) {
     return UseCaseMethod(
+        originString: map['originString'] ?? '',
         platform: map['platform'] ?? "",
         methodName: map['methodName'] ?? "",
         returnType: map['returnType'] ?? "",
@@ -239,6 +167,20 @@ class UseCaseMethod {
           _originReturnType.substring(0, _originReturnType.length - 1);
     }
     return _originReturnType;
+  }
+
+  // 不带Future 和 ？的返回值类型
+  String _syncReturnType = '';
+  String get syncReturnType {
+    if (_syncReturnType.isNotEmpty) {
+      return _syncReturnType;
+    }
+    _syncReturnType = returnType;
+    if (_syncReturnType.startsWith('Future')) {
+      _syncReturnType =
+          _syncReturnType.substring(7, _syncReturnType.length - 1);
+    }
+    return _syncReturnType;
   }
 
   // 方法参数定义: String arg1, int arg2
@@ -317,31 +259,18 @@ class UseCaseMethod {
   }
 }
 
-class UseCaseEntity with ImportEntity {
+class UseCaseEntity {
+  List<EnumEntity> enums = [];
   List<UseCaseMethod> callbacks = [];
   List<UseCaseClass> classes = [];
   List<UseCaseMethod> typedefCallbacks = [];
 
   UseCaseEntity.fromJson(Map<String, dynamic> json) {
-    if (json['ios_import'] != null) {
-      for (var item in json['ios_import']) {
-        _ios_import.add(item);
-      }
-    }
-    if (json['android_import'] != null) {
-      for (var item in json['android_import']) {
-        _android_import.add(item);
-      }
-    }
-    if (json['dart_import'] != null) {
-      for (var item in json['dart_import']) {
-        if (!(item as String).endsWith("Listener.dart';")) {
-          _dart_import.add(item);
-        }
-      }
-    }
     classes = ((json['classes'] ?? []) as List)
         .map((e) => UseCaseClass.fromMap(e))
+        .toList();
+    enums = ((json['enums'] ?? []) as List)
+        .map((e) => EnumEntity.fromJson(e))
         .toList();
     if (json['callbacks'] != null) {
       for (var item in json['callbacks']) {
